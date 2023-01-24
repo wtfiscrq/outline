@@ -41,10 +41,13 @@ export const LANGUAGES = {
   swift: "Swift",
   toml: "TOML",
   typescript: "TypeScript",
-  visualbasic: "Visual Basic",
+  "visual-basic": "Visual Basic",
   yaml: "YAML",
   zig: "Zig",
 };
+
+// Languages that are not supported by refractor or are specially handled
+const EXCLUDED_LANGUAGES = ["mermaidjs"];
 
 type ParsedNode = {
   text: string;
@@ -87,11 +90,23 @@ function getDecorations({
     });
   }
 
-  blocks.forEach((block) => {
+  blocks.forEach(async (block) => {
     let startPos = block.pos + 1;
     const language = block.node.attrs.language;
-    if (!language || language === "none" || !refractor.registered(language)) {
+    const isExcluded = EXCLUDED_LANGUAGES.includes(language);
+    if (!language || language === "none" || isExcluded) {
       return;
+    }
+
+    if (!refractor.registered(language)) {
+      try {
+        // Dynamically load and register the language module
+        const mod = await import(`refractor/lang/${language}`);
+        refractor.register(mod.default);
+      } catch (e) {
+        console.error(`Failed loading '${language}' language module: ${e}`);
+        return;
+      }
     }
 
     const lineDecorations = [];
