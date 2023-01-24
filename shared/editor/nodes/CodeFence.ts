@@ -40,6 +40,7 @@ import perl from "refractor/lang/perl";
 import php from "refractor/lang/php";
 import powershell from "refractor/lang/powershell";
 import python from "refractor/lang/python";
+// @ts-expect-error missing types
 import rego from "refractor/lang/rego";
 import ruby from "refractor/lang/ruby";
 import rust from "refractor/lang/rust";
